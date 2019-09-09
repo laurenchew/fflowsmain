@@ -41,10 +41,26 @@ def duration_calc(df_local):
 	thld=df_local.quantile(q=p)	
 	ix=(df_local>thld)*1	
 	#dur=ix.resample('AS-OCT').sum() #Wants median number of days that a flow stays over the threshold, not just how many days in a year
-	dur=(ix.diff==1)
-	count= ###COME BACK HERE#####
-	#average_dur=ix.resample('AS-OCT').median()
-	return dur
+	#dur=(ix.diff==1)
+	dur=pd.DataFrame() #creates empty df
+	print (ix.diff)
+	if ix.diff==1:
+		count=1
+		something=0
+		dur=pd.DataFrame() #creates empty df
+		while ix.diff==0:
+			count=count+1
+			something=something+ix
+		dur=dur.append(something)
+	#want year of index preserved if using resample in function
+	#want just an array with counts if annually outside when .apply
+#	for i in range[df.index[0].year,df.index[len(df)-1].year]:
+#		while df.index.year==i:
+#			if ix.diff==1:
+#				newmatrix=
+	average_dur=dur.median()	
+	#average_dur=dur.resample('AS-OCT').median()
+	return average_dur
 
 '''Frequency''' #Number of times a flow crosses exceedance flow threshold
 def frequency_calc(df_local):
