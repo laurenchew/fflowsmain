@@ -4,27 +4,60 @@ Created on Sun Jul 28 15:38:45 2019
 
 @author: lgche
 """
-
 import pandas as pd
-import numpy as np
+#import numpy as np
 #import matplotlib.pyplot as plt
 
 # load CSV data
 df = pd.read_csv('FOL_in.csv',parse_dates=True, index_col=0)
 filenamein='FOL_in'
 
-############## Wet Season Initiation ############## (not started)
-#wetdf=df[(df.index.month>9) & ((df.index.month<13) & (df.index.day<16))] #does same thing as below
+############## Wet Season Initiation ##############
+#Metric 1: Start Timing
+ix=(df.index.month>9) & ((df.index.month<=12) & (df.index.day<=15)) #provided by eFlows
+searchdf=df[ix]
+def ixstart_calc(df_local):
+	thld=df_local.min()*1.5 #exceedance values, 1.5 is arbitrary but seems reasonable, may not make sense to use same yr bc not helpful for real time/predictive
+	ix=(df_local>thld) 
+	start_df=df_local[ix] #is properly sorting, but want start_df to only be float64
+	#print(start_df)#.dtypes) #keeps all the dates since all cols in one start_df
+	ix=(start_df.dtypes=='float64')
+	#print(ix)
+	start=start_df[ix]#.reset_index()
+	#print(start)
+	start_date=start_df.reset_index().index[0] #want index of first not NaN
+	return start_df.resample('AS-OCT')
+startdates=searchdf.apply(ixstart_calc) #want one date for each year for each CM
 
-#ix=(df.index.month>9) & ((df.index.month<13) & (df.index.day<16))
-#wetstartdf=df[ix] #or df.loc[ix] does same
+#something=df.iloc[:,0].index[df.values==810.22] #not working, error "Buffer has wrong number of dimensions (expected 1, got 2)"
 
+#Get index of max
+#def index_get(df_local_local):
+#  i = np.argmax(df_local_local.values, axis=0)
+#  return i if i >= 0 else np.nan
+#max_flow_index = (smooth_df.resample('AS-OCT').apply(idxmax))
+
+#%%
+#Metric 2: Wet Season Baseflow Magnitude
+#Uses start of dry season and start of peak mag season
+#Calculate 10th and 50th percentile flows of these - as peak magnitude season baseflow mag
+'''Wet-Season Baseflow Magnitude'''
+wetstartm=10 #will put in true values later
+wetstartd=20
+wetendm= 3
+wetendd=15
+'''Max flow search range'''
+ix = ((df.index.month >= wetstartm)&(df.index.day>=wetstartd)) & ((df.index.month <=wetendm)&(df.index.day<=wetendm)) # only wet season
+wet_df=df[ix] #not working
+baseflow=df.quantile(q=0.1)
+#wetseasonbfmag=wetseasondf.resample('AS-OCT').quantile(0.1)
+#%%
 ##Need to find the magnitude of previous dry season's base flow or use 3cfs
 ##Starting at 1952 ()
 #previousbf=baseflow[df.index.year-1]
 #ix=(df>baseflow[#PREVIOUS YEAR]) #not working
 #if baseflow[df.index.year=baseflow[df.index.year-1]]>3:
-#	baseflow=previous year
+#	baseflow=previous year #want to fill in annual matrix
 #else baseflow=3
 #dummyibf=2*df.resample('AS-OCT').min() #one value per year per CM
 
@@ -47,17 +80,7 @@ def find_peak(df_local): #function that will be applied to annually resampled da
 	yrpeaks=df_local.max() #want multiple maximas, will need to use numerical solution
 	#should I check slope from pos to neg (using spline and 1st derivative) instead of where change is close to zero?
 	
-#Uses start of dry season and start of peak mag season
-#Calculate 10th and 50th percentile flows of these - as peak magnitude season baseflow mag
-#'''Wet-Season Baseflow Magnitude'''
-#wetstartm=10 #will put in true values later
-#wetstartd=20
-#wetendm= 3
-#wetendd=15
-#'''Max flow search range'''
-#ix = ((df.index.month >= wetstartm)&(df.index.day>=wetstartd)) & ((df.index.month <=wetendm)&(df.index.day<=wetendm)) # only wet season
-#wet_df=df[ix] #not working
-#baseflow=df.quantile(q=0.1)
+
 
 '''Min flow search Range'''
 startm=10 #will put in true values later
