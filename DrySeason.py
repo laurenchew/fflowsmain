@@ -134,7 +134,6 @@ baseflow=dry_df[ix].resample('AS-OCT').quantile(0.1)
 #baseflow = (df.resample('AS-OCT').apply(summer_low))
 
 #%% 
-#df1 = df.iloc[0:5,0:2] #indexing the data frame
 
 #df.plot(title='Peak Summer Flow') #plots all the CMs against 'year'
 #df.to_csv('FOL_in_pksummer.csv')
@@ -144,11 +143,6 @@ baseflow=dry_df[ix].resample('AS-OCT').quantile(0.1)
 #numyr=max(df.index.year)-min(df.index.year)+1 #len(baseflow)
 #size=(1,numyr) #h=(1,np.size(t)) also works
 #year=np.zeros(size) #can't use y=np.zeros(1,len(t), dtype=int) Doesn't work
-#year[0,0]=0 #set initial conditon
-#for i in range(1,numyr):
-#yr=min(df.index.year)+i
-#yrdf=df[df.index.year == yr]
-#yrdf.to_csv(file_name(),index=False)
 
 ##Peak Summer Flow (If i simplify it to being May-September, not calculating real start of dry season)
 #ix = (df.index.month > 4 ) & (df.index.month < 10)

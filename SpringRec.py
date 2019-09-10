@@ -20,7 +20,8 @@ ix=(df.index.month>3) & ((df.index.month<=6) & (df.index.day<=15)) #arbitrary da
 spring_df=df[ix]
 
 '''Duration'''
-
+#enddate-startdate
+#df.index[3]-df.index[0] #gives answer in days
 
 '''Rate of Change'''
 

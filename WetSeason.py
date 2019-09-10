@@ -5,7 +5,7 @@ Created on Sun Jul 28 15:38:45 2019
 @author: lgche
 """
 import pandas as pd
-import numpy as np
+#import numpy as np
 #import matplotlib.pyplot as plt
 
 # load CSV data
@@ -15,7 +15,31 @@ filenamein='FOL_in'
 ############## Wet Season Initiation ##############
 #Metric 1: Start Timing
 ix=(df.index.month>9) & ((df.index.month<=12) & (df.index.day<=15)) #provided by eFlows
-searchdf=df[ix]
+wet_df=df[ix]
+
+#Step 4
+def water_day(datestring):
+  d = pd.to_datetime(datestring).dayofyear
+  return d - 274 if d >= 274 else d + 91
+
+def max_index(df):
+	i=np.argmax(wet_df.values, axis=0) #gives index for min for each year
+	i=i + water_day('%d-%d-2019' % (wetstart, day))
+	return i  # this isn't perfect because of leap years, but close enough
+def max_flow_calc(local_df):
+	i=np.argmax(local_df.values, axis=0)
+wsmaxflow = (wet_df.resample('AS-OCT').apply(max_flow_calc))
+
+def min_index(df):
+	i=np.argmin(wet_df.values, axis=0) #gives index for min for each year
+	i=i + water_day('%d-%d-2019' % (drystart, day)) #gives index adjusted for June 1 #Maybe there is a better way to do this using my defined start date 
+	return i  # this isn't perfect because of leap years, but close enough
+def min_flow_calc(local_df):
+	i=np.argmin(local_df.values, axis=0)
+	return local_df.values[i] #returns magnitude
+wsminflow = (wet_df.resample('AS-OCT').apply(min_flow_calc)) #need to add in search range to be between start and timing of max flow
+ 
+#Step 5
 def ixstart_calc(df_local):
 	thld=df_local.min()*1.5 #exceedance values, 1.5 is arbitrary but seems reasonable, may not make sense to use same yr bc not helpful for real time/predictive
 	#thld=df_local.quantile(0.5)
@@ -23,11 +47,17 @@ def ixstart_calc(df_local):
 	start_df=df_local[ix] #is properly sorting
 	#print(start_df) #working now that removed resample from call of function, confused by .resample
 	start_date=(start_df.resample('AS-OCT'))
+	
+	df_pos=df_local[df_local.diff>0] #only points with positive slopes
+	dthld=df_pos.diff.median
+	ix=(df_local.diff>dthld) #only positive, steep slopes
+	
 #	years=np.arange(df.index.year[0], df.index.year[len(df)-1]+1, 1)
 #	for i in years:
 #		while (start_df.index.year==i):
 #			start_date=start_df[0]
 	#print (start_date)
+	
 	#ix=(start_df.dtypes=='float64')
 	#start=start_df[ix]#.reset_index()
 	#start_dates=start_df.resample('AS-OCT') #want index of first non NaN
@@ -82,11 +112,9 @@ baseflow=df.quantile(q=0.1)
 '''Wet Season Start Timing'''
 def find_peak(df_local): #function that will be applied to annually resampled data
 	yrpeaks=df_local.max() #want multiple maximas, will need to use numerical solution
-	#should I check slope from pos to neg (using spline and 1st derivative) instead of where change is close to zero?
-	
+	#should I check slope from pos to neg (using spline and 1st derivative) instead of where change is close to zero? can use df.diff>=0 to df.diff<=0
 
-
-'''Min flow search Range'''
+'''Min flow search Range''' #why is this not working
 startm=10 #will put in true values later
 startd=1
 endm=12
