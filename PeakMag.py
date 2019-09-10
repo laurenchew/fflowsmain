@@ -37,31 +37,29 @@ def magnitude_calc(df_local):
 	return pm_df.resample('AS-OCT').median() 
 
 '''Duration''' #Number of days in each year above the threshold
-def duration_calc(df_local):
-	pass
-	thld=df_local.quantile(q=p)	
+def duration_calc(df_local): #df_local is one year of data
+	thld=df_local.quantile(q=p)	 #consider taking it out of function and into loop later
 	ix=(df_local>thld)*1	
-	#dur=ix.resample('AS-OCT').sum() #Wants median number of days that a flow stays over the threshold, not just how many days in a year
-	#dur=(ix.diff==1)
-	dur=pd.DataFrame() #creates empty df
-	print (ix.diff)
-	if ix.diff==1:
-		count=1
-		something=0
-		dur=pd.DataFrame() #creates empty df
-		while ix.diff==0:
-			count=count+1
-			something=something+ix
-		dur=dur.append(something)
-	#want year of index preserved if using resample in function
-	#want just an array with counts if annually outside when .apply
-#	for i in range[df.index[0].year,df.index[len(df)-1].year]:
+	durations=[]
+	counting=False
+	for i in ix:
+		if i==1:
+			if not counting:
+				counting=True
+				durations.append(1)
+			else:
+				durations[-1]+=1
+		else:
+			if counting:
+				counting=False
+	print (durations)
+	return durations
+#for i in range[df.index[0].year,df.index[len(df)-1].year]:
 #		while df.index.year==i:
-#			if ix.diff==1:
-#				newmatrix=
-	average_dur=dur.median()	
-	#average_dur=dur.resample('AS-OCT').median()
-	return average_dur
+df.resample('AS-OCT').apply(duration_calc)
+
+#Can try using numpy and matricies and having a function only process one year of data at a time (con: slower)
+	#9/10 was trying to use .cumsum()
 
 '''Frequency''' #Number of times a flow crosses exceedance flow threshold
 def frequency_calc(df_local):
@@ -76,8 +74,8 @@ for p in percentile:
 	peak_mag=df.apply(magnitude_calc) #it already knows 1 col at a time
 	#peak_mag.to_csv(file_name_mag(p))
 	#duration=df.apply(duration_calc)
-	#duration=df.resample('AS-OCT').apply(duration_calc)
-	duration=df.iloc[0:365,0].apply(duration_calc)
+	duration=df.resample('AS-OCT').apply(duration_calc)
+	#duration=df.iloc[0:365,0].apply(duration_calc)
 	#duration.to_csv(file_name_dur(p))
 	frequency=df.apply(frequency_calc)
 	#frequency.to_csv(file_name_freq(p))
