@@ -5,7 +5,7 @@ Created on Sun Jul 28 15:38:45 2019
 @author: lgche
 """
 import pandas as pd
-#import numpy as np
+import numpy as np
 #import matplotlib.pyplot as plt
 
 # load CSV data
@@ -18,20 +18,24 @@ ix=(df.index.month>9) & ((df.index.month<=12) & (df.index.day<=15)) #provided by
 searchdf=df[ix]
 def ixstart_calc(df_local):
 	thld=df_local.min()*1.5 #exceedance values, 1.5 is arbitrary but seems reasonable, may not make sense to use same yr bc not helpful for real time/predictive
+	#thld=df_local.quantile(0.5)
 	ix=(df_local>thld) 
-	start_df=df_local[ix] #is properly sorting, but want start_df to only be float64
-	#print(start_df)#.dtypes) #keeps all the dates since all cols in one start_df
-	ix=(start_df.dtypes=='float64')
-	#print(ix)
-	start=start_df[ix]#.reset_index()
-	#print(start)
-	start_date=start_df.reset_index().index[0] #want index of first not NaN
-	return start_df.resample('AS-OCT')
+	start_df=df_local[ix] #is properly sorting
+	#print(start_df) #working now that removed resample from call of function, confused by .resample
+	start_date=(start_df.resample('AS-OCT'))
+#	years=np.arange(df.index.year[0], df.index.year[len(df)-1]+1, 1)
+#	for i in years:
+#		while (start_df.index.year==i):
+#			start_date=start_df[0]
+	#print (start_date)
+	#ix=(start_df.dtypes=='float64')
+	#start=start_df[ix]#.reset_index()
+	#start_dates=start_df.resample('AS-OCT') #want index of first non NaN
+	#print(start_dates)
+	return start_date
 startdates=searchdf.apply(ixstart_calc) #want one date for each year for each CM
 
-#something=df.iloc[:,0].index[df.values==810.22] #not working, error "Buffer has wrong number of dimensions (expected 1, got 2)"
-
-#Get index of max
+#Get index of max FOR REFERENCE
 #def index_get(df_local_local):
 #  i = np.argmax(df_local_local.values, axis=0)
 #  return i if i >= 0 else np.nan
@@ -42,13 +46,13 @@ startdates=searchdf.apply(ixstart_calc) #want one date for each year for each CM
 #Uses start of dry season and start of peak mag season
 #Calculate 10th and 50th percentile flows of these - as peak magnitude season baseflow mag
 '''Wet-Season Baseflow Magnitude'''
-wetstartm=10 #will put in true values later
+wetstartm=10 #will put in true values later start_dates[]
 wetstartd=20
 wetendm= 3
 wetendd=15
 '''Max flow search range'''
-ix = ((df.index.month >= wetstartm)&(df.index.day>=wetstartd)) & ((df.index.month <=wetendm)&(df.index.day<=wetendm)) # only wet season
-wet_df=df[ix] #not working
+ix = (((df.index.month >= wetstartm)&(df.index.day>=wetstartd)) & ((df.index.month <=wetendm)&(df.index.day<=wetendm))) # only wet season
+wet_df=df[ix] #no errors, but not giving what we want
 baseflow=df.quantile(q=0.1)
 #wetseasonbfmag=wetseasondf.resample('AS-OCT').quantile(0.1)
 #%%
