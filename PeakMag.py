@@ -6,7 +6,7 @@ Created on Sun Jul 28 15:38:45 2019
 """
 
 import pandas as pd
-#import numpy as np
+import numpy as np
 #import matplotlib.pyplot as plt
 
 # load CSV data
@@ -40,26 +40,19 @@ def magnitude_calc(df_local):
 def duration_calc(df_local): #df_local is one year of data
 	thld=df_local.quantile(q=p)	 #consider taking it out of function and into loop later
 	ix=(df_local>thld)*1	
-	durations=[]
+	dur=[]
 	counting=False
 	for i in ix:
 		if i==1:
 			if not counting:
 				counting=True
-				durations.append(1)
+				dur.append(1)
 			else:
-				durations[-1]+=1
+				dur[-1]+=1
 		else:
 			if counting:
 				counting=False
-	print (durations)
-	return durations
-#for i in range[df.index[0].year,df.index[len(df)-1].year]:
-#		while df.index.year==i:
-df.resample('AS-OCT').apply(duration_calc)
-
-#Can try using numpy and matricies and having a function only process one year of data at a time (con: slower)
-	#9/10 was trying to use .cumsum()
+	return np.median(dur) #seems reasonable
 
 '''Frequency''' #Number of times a flow crosses exceedance flow threshold
 def frequency_calc(df_local):
@@ -73,9 +66,7 @@ for p in percentile:
 	#thld=df.quantile(q=p,numeric_only=True) #had issue with non-identically-labeled Series objects if used thld out of function
 	peak_mag=df.apply(magnitude_calc) #it already knows 1 col at a time
 	#peak_mag.to_csv(file_name_mag(p))
-	#duration=df.apply(duration_calc)
 	duration=df.resample('AS-OCT').apply(duration_calc)
-	#duration=df.iloc[0:365,0].apply(duration_calc)
 	#duration.to_csv(file_name_dur(p))
 	frequency=df.apply(frequency_calc)
 	#frequency.to_csv(file_name_freq(p))
