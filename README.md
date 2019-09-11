@@ -9,8 +9,8 @@ Adapted code from https://eflow.gitbook.io/ffc-readme/ by Sarah Yarnell and Noel
 
 ## Usage
 
-Required Libraries: Numpy, Pandas
+**Required Libraries:** Numpy, Pandas
 
-Input File: FOL_in.csv
+**Input File:** FOL_in.csv
 
-Running Code: Each .py is run individually and outputs results into csv. Only the Annual.py and PeakMag.py scripts run without error. WetSeason.py, SpringRec.py, and DrySeason.py are not functioning.
+**Running Code:** Each script is run individually and outputs results into csv. Only the Annual.py and PeakMag.py scripts run without error. WetSeason.py, SpringRec.py, and DrySeason.py are not functioning.
