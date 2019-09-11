@@ -10,8 +10,9 @@ import numpy as np
 #import matplotlib.pyplot as plt
 
 # load CSV data
-df = pd.read_csv('FOL_in.csv',parse_dates=True, index_col=0)
-filenamein='FOL_in'
+filenamestart='FOL_in'
+df = pd.read_csv(filenamestart+'.csv',parse_dates=True, index_col=0)
+
 
 ######## Annual Metrics ################ (complete)
 '''Average Annual Flow'''
