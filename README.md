@@ -1,4 +1,4 @@
-# Calculating Functional Flow Metrics for several California Reservoirs
+# Calculating Functional Flow Metrics
 
 Lauren Chew, with CM flow data from Jonathan Cohen, supervised by Jon Herman
 
@@ -11,4 +11,6 @@ Adapted code from https://eflow.gitbook.io/ffc-readme/ by Sarah Yarnell and Noel
 
 Required Libraries: Numpy, Pandas
 
-Running Code: Each .py is run individually and outputs results into csv
+Input File: FOL_in.csv
+
+Running Code: Each .py is run individually and outputs results into csv. Only the Annual.py and PeakMag.py scripts run without error. WetSeason.py, SpringRec.py, and DrySeason.py are not functioning.
