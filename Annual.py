@@ -17,11 +17,11 @@ df = pd.read_csv(filenamestart+'.csv',parse_dates=True, index_col=0)
 ######## Annual Metrics ################ (complete)
 '''Average Annual Flow'''
 average_annual_flow=df.resample('AS-OCT').mean()
-filename=filenamein +'_average_annual_flow.csv'
+filename=filenamestart +'_average_annual_flow.csv'
 average_annual_flow.to_csv(filename)
 '''Coefficient of Variation'''
 coeff_of_variation=df.resample('AS-OCT').std()
-filename=filenamein +'_coeff_of_variation.csv'
+filename=filenamestart +'_coeff_of_variation.csv'
 coeff_of_variation.to_csv(filename)
 
 #Plot of everything
