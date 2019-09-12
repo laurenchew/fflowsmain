@@ -7,11 +7,11 @@ Created on Sun Jul 28 15:38:45 2019
 
 import pandas as pd
 import numpy as np
-#import matplotlib.pyplot as plt
 
 # load CSV data
-df = pd.read_csv('FOL_in.csv',parse_dates=True, index_col=0)
 filenamein='FOL_in'
+df = pd.read_csv(filenamein+'.csv',parse_dates=True, index_col=0)
+
 
 ############ Peak Magnitude High Flows ############### 
 
@@ -29,7 +29,7 @@ def file_name_freq(p):
 	filenameout=filenamein+'_PM'+pct+'%Freq'+'.csv'
 	return filenameout
 
-'''Magnitude''' #Median value of flow magnitudes above thld
+'''Magnitude''' #Median value of flow magnitudes above threshold
 def magnitude_calc(df_local):
 	thld=df_local.quantile(q=p) #exceedance values
 	ix=(df_local>thld) 
@@ -38,7 +38,7 @@ def magnitude_calc(df_local):
 
 '''Duration''' #Number of days in each year above the threshold
 def duration_calc(df_local): #df_local is one year of data
-	thld=df_local.quantile(q=p)	 #consider taking it out of function and into loop later
+	thld=df_local.quantile(q=p)
 	ix=(df_local>thld)*1	
 	dur=[]
 	counting=False
@@ -52,22 +52,20 @@ def duration_calc(df_local): #df_local is one year of data
 		else:
 			if counting:
 				counting=False
-	return np.median(dur) #seems reasonable
+	return np.median(dur) 
 
 '''Frequency''' #Number of times a flow crosses exceedance flow threshold
 def frequency_calc(df_local):
 	thld=df_local.quantile(q=p)	
 	ix=(df_local>thld)*1	
-	freq=(ix.diff()==1).resample('AS-OCT').sum() #options are -1,1 or 0
-	return freq
+	return (ix.diff()==1).resample('AS-OCT').sum() 
 
 percentile=[.98,.95,.90,.80]
 for p in percentile:
-	#thld=df.quantile(q=p,numeric_only=True) #had issue with non-identically-labeled Series objects if used thld out of function
-	peak_mag=df.apply(magnitude_calc) #it already knows 1 col at a time
-	#peak_mag.to_csv(file_name_mag(p))
+	peak_mag=df.apply(magnitude_calc)
+	peak_mag.to_csv(file_name_mag(p))
 	duration=df.resample('AS-OCT').apply(duration_calc)
-	#duration.to_csv(file_name_dur(p))
+	duration.to_csv(file_name_dur(p))
 	frequency=df.apply(frequency_calc)
-	#frequency.to_csv(file_name_freq(p))
-	#Even in 20th percentile there are years that do not have a PM, calculate thld differntly?
+	frequency.to_csv(file_name_freq(p))
+	
