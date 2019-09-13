@@ -5,7 +5,7 @@ Created on Sun Jul 28 15:38:45 2019
 @author: lgche
 """
 import pandas as pd
-#import numpy as np
+from scipy.signal import find_peaks
 
 # load CSV data
 filenamein='FOL_in'
@@ -17,16 +17,15 @@ ix=(df.index.month>9) & ((df.index.month<=12) & (df.index.day<=15)) #provided by
 wetstart_df=df[ix] #search range for the start date of the wet season
 
 '''Timing'''
-#Use arbitrary dates at first
+#Use dates provided by existing Fflows Calculator
 #start of peak mag season=start of wet season
 #start of dry season=end of wet season
-wetstartm=10 #provided by eflows framework
+wetstartm=10 
 wetstartd=20
 ix = ( ((df.index.month == wetstartm)&(df.index.day>=wetstartd)) | (df.index.month != 10))
 wet_df=df[ix] #data frame with only wet season
 
 #Find earliest peak starting 20days after the beginning of the water year
-from scipy.signal import find_peaks
 def peak_finder(local_df):
 	thld=local_df.quantile(q=0.8)
 	peaks=find_peaks(local_df, height=thld)
