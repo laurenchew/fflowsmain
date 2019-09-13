@@ -9,8 +9,8 @@ Adapted code from https://github.com/leogoesger/func-flow by Sarah Yarnell and N
 Additional documentation https://eflow.gitbook.io/ffc-readme/ 
 ## Usage
 
-**Required Libraries:** Numpy, Pandas
+**Required Libraries:** Numpy, Pandas and ScyPi
 
 **Input File:** FOL_in.csv
 
-**Running Code:** Each script is run individually and outputs results into csv. Only the Annual.py and PeakMag.py scripts run without error. WetSeason.py, SpringRec.py, and DrySeason.py are not functioning.
+**Running Code:** Each script is run individually and outputs results into csv. Only the Annual and PeakMag scripts run properly. The WetSeason script runs but I have not been able to extract the correct data. SpringRec and DrySeason scripts are not functioning.
