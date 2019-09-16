@@ -12,14 +12,14 @@ from scipy.ndimage import gaussian_filter1d
 import math
 #import matplotlib.pyplot as plt
 
-# load CSV data
-df = pd.read_csv('FOL_in.csv',parse_dates=True, index_col=0)
+# load CSV 
 filenamein='FOL_in'
+df = pd.read_csv(filenamein+'.csv',parse_dates=True, index_col=0)
 	
-############# Dry Season Low Flow ################ 
+############# Dry Season Baseflow ################ 
 
 #Possible Improvement: append each year with water year of first 30days of next yr
-'''Find last Major Peak'''
+'''Find last Major Peak''' #identifies last major peak after which to search for start date
 #def indexmax(df):
 #	for i in df.columns: #cycles through CM
 #		df[df[i].values>flow_threshold]
@@ -28,35 +28,37 @@ filenamein='FOL_in'
 
   #i = np.argmax(df.values, axis=0).last
   #return i if i >= 0 else np.nan
-#start_date = (smooth_df.resample('AS-OCT').apply(idxmax)) #I think this works, gives me number in the year
-#smooth_df.resample('AS-OCT').index(start_date)
-#shape=len(df.resample('AS-OCT'))
 #mag_matrix=np.full(np.shape(df.resample('AS-OCT')), np.nan)
 #mag_matrix=smooth_df.resample('AS-OCT').max().last #removes it from variable explorer, gives annual last max
+##Peak Summer Flow (If i simplify it to being May-September, not calculating real start of dry season)
+ix = (df.index.month > 4 ) & (df.index.month < 10)
+dataframe=df[ix]
+peakdate = dataframe.resample('AS-OCT').apply(pd.DataFrame.idxmax) #only runs on summer months
 
-'''Magnitude Threshold''' #moved it to be in the Timing metric so calcs one per year
-#min_flow_df= smooth_df.resample('AS-OCT').min() #min_flow_data = min(smooth_data[max_flow_index:366])
-#max_flow_df= smooth_df.resample('AS-OCT').max() #smooth_data[max_flow_index]
-#min_summer_flow_percent= 0.125 # Don't calculate flow metrics if max flow is below this value.
-#flow_threshold=min_flow_df + max_flow_df.subtract(min_flow_df)*min_summer_flow_percent 
-#Not sure what this next part from FFLOWs does, refers to part in calc_summer_baseflow.py
-# if abs(spl_first(index)) < max_flow_data * current_sensitivity and index > max_flow_index and data < threshold:
-# start_dates[-1] = index
-# break
+from utils.helpers import find_index, peakdet
+mean_flow=np.nanmean(df) #single value
+peak_sensitivity = 0.2
+from scipy.signal import find_peaks
+def peak_finder(local_df):
+	thld=local_df.quantile(q=0.8) #or mean_flow*peak_sensitivity with peak_sensitivity=0.2
+	peaks=find_peaks(local_df, height=thld)
+	return peaks
+peak_info=df.resample('AS-OCT').apply(peak_finder) #indicies, dtype, & values
+#want last major peak of the year
 
 '''Dry Season Timing'''
 def idxmax(df_local): #Get index of max
 	min_flow_df= df_local.min() #min_flow_data = min(smooth_data[max_flow_index:366])
 	max_flow_df= df_local.max() #smooth_data[max_flow_index]
 	min_summer_flow_percent= 0.125 # Don't calculate flow metrics if max flow is below this value.
-	flow_threshold=min_flow_df + max_flow_df.subtract(min_flow_df)*min_summer_flow_percent 
-	return df_local[df_local>flow_threshold].last('1D').index #want last value of new data frame of only the peaks
+	flow_thld=min_flow_df + max_flow_df.subtract(min_flow_df)*min_summer_flow_percent 
+	rate_of_change_thld=100 #arbitrary number, what is reasonable?
+	df_local= df_local[(df_local<flow_thld) & (df.diff<rate_of_change_thld)]
+	#Need to check that date is after the last major peak flow
+	return df_local#want last value of new data frame of only the peaks
 start_date=df.resample('AS-OCT').apply(idxmax)
 
 #%%
-'''Check flow for Characteristics'''
-mean_flow=np.nanmean(df)
-peak_sensitivity = 0.2
 def peakdet(df, delta, x = None): # From FFLOWS - Converted from MATLAB script at http://billauer.co.il/peakdet.html
     maxtab, mintab = [], [] #creates empty lists
     if x is None:
@@ -112,7 +114,6 @@ wetstartd=1
 ix = ((df.index.month >= drystartm)&(df.index.day>=drystartd)) & ((df.index.month <=wetstartm)&(df.index.day<=wetstartm)) # only summer
 dry_df=df[ix]
 
-
 '''Duration'''
 #duration=drystart-wetstart #need to define these, can even be integers
 
@@ -133,23 +134,4 @@ baseflow=dry_df[ix].resample('AS-OCT').quantile(0.1)
 #	return df.values[i] #returns magnitude
 #baseflow = (df.resample('AS-OCT').apply(summer_low))
 
-#%% 
 
-#df.plot(title='Peak Summer Flow') #plots all the CMs against 'year'
-#df.to_csv('FOL_in_pksummer.csv')
-
-#Function to get yearly data: loop from 1951 to 2099
-#baseflow=df.resample('AS-OCT').quantile(0.1)
-#numyr=max(df.index.year)-min(df.index.year)+1 #len(baseflow)
-#size=(1,numyr) #h=(1,np.size(t)) also works
-#year=np.zeros(size) #can't use y=np.zeros(1,len(t), dtype=int) Doesn't work
-
-##Peak Summer Flow (If i simplify it to being May-September, not calculating real start of dry season)
-#ix = (df.index.month > 4 ) & (df.index.month < 10)
-#peakdate = df[ix].resample('AS-OCT').apply(pd.DataFrame.idxmax) #only runs on summer months
-
-##Get index of max
-#def idxmax(df):
-#  i = np.argmax(df.values, axis=0)
-#  return i if i >= 0 else np.nan
-#max_flow_index = (smooth_df.resample('AS-OCT').apply(idxmax))
