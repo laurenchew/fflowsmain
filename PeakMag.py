@@ -12,8 +12,13 @@ import numpy as np
 filenamein='FOL_in'
 df = pd.read_csv(filenamein+'.csv',parse_dates=True, index_col=0)
 
-
 ############ Peak Magnitude High Flows ############### 
+
+''''Create Folder for Outputs'''
+import os
+path='Peak_Mag_Output'
+if not os.path.exists(path):
+	os.mkdir(path)
 
 '''File Names''' #need unique file name string to save csv as
 def file_name_mag(p): 
@@ -60,12 +65,13 @@ def frequency_calc(df_local):
 	ix=(df_local>thld)*1	
 	return (ix.diff()==1).resample('AS-OCT').sum() 
 
+'''Calculate and Save to csv files'''
 percentile=[.98,.95,.90,.80]
 for p in percentile:
 	peak_mag=df.apply(magnitude_calc)
-	peak_mag.to_csv(file_name_mag(p))
+	peak_mag.to_csv(path+'/'+ str(file_name_mag(p)))
 	duration=df.resample('AS-OCT').apply(duration_calc)
-	duration.to_csv(file_name_dur(p))
+	duration.to_csv(path+'/'+ str(file_name_dur(p)))
 	frequency=df.apply(frequency_calc)
-	frequency.to_csv(file_name_freq(p))
+	frequency.to_csv(path+'/'+ str(file_name_freq(p)))
 	
