@@ -16,22 +16,22 @@ df = pd.read_csv(filenamein+'.csv',parse_dates=True, index_col=0)
 
 ''''Create Folder for Outputs'''
 import os
-path='Peak_Mag_Output'
+path='PeakMag_Output'
 if not os.path.exists(path):
 	os.mkdir(path)
 
 '''File Names''' #need unique file name string to save csv as
 def file_name_mag(p): 
 	pct=' %.f'%((1-p)*100)
-	filenameout=filenamein+'_PM'+pct+'%Mag'+'.csv'
+	filenameout=filenamein+'_PM'+pct+'%_Mag'+'.csv'
 	return filenameout
 def file_name_dur(p): 
 	pct=' %.f'%((1-p)*100) 
-	filenameout=filenamein+'_PM'+pct+'%Dur'+'.csv'
+	filenameout=filenamein+'_PM'+pct+'%_Dur'+'.csv'
 	return filenameout
 def file_name_freq(p):
 	pct=' %.f'%((1-p)*100) 
-	filenameout=filenamein+'_PM'+pct+'%Freq'+'.csv'
+	filenameout=filenamein+'_PM'+pct+'%_Freq'+'.csv'
 	return filenameout
 
 '''Magnitude''' #Median value of flow magnitudes above threshold

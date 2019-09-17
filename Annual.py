@@ -6,13 +6,10 @@ Created on Sun Jul 28 15:38:45 2019
 """
 
 import pandas as pd
-#import numpy as np
-#import matplotlib.pyplot as plt
 
 # load CSV data
-filenamestart='FOL_in'
-df = pd.read_csv(filenamestart+'.csv',parse_dates=True, index_col=0)
-
+filenamein='FOL_in'
+df = pd.read_csv(filenamein+'.csv',parse_dates=True, index_col=0)
 
 ######## Annual Metrics ################ (complete)
 '''Create Folder for Outputs'''
@@ -26,10 +23,10 @@ except OSError:
 
 '''Average Annual Flow'''
 average_annual_flow=df.resample('AS-OCT').mean()
-filename=filenamestart +'_average_annual_flow.csv'
+filename=filenamein +'_average_annual_flow.csv'
 average_annual_flow.to_csv(path+'/'+ filename)
 
 '''Coefficient of Variation'''
 coeff_of_variation=df.resample('AS-OCT').std()
-filename=filenamestart +'_coeff_of_variation.csv'
+filename=filenamein +'_coeff_of_variation.csv'
 coeff_of_variation.to_csv(path+'/'+ filename)
