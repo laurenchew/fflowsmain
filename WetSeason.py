@@ -25,8 +25,8 @@ ix=(df.index.month>9) & ((df.index.month<=12) & (df.index.day<=15)) #provided by
 wetstart_df=df[ix] #search range for the start date of the wet season
 
 '''Timing'''
-#Use start date range provided by existing Fflows Calculator
-#start of peak mag season=start of wet season, start of dry season=end of wet season
+'''Use start date range provided by existing Fflows Calculator
+Start of peak mag season=start of wet season, start of dry season=end of wet season'''
 wetstartm=10
 wetstartd=20
 ix = ( ((df.index.month == wetstartm)&(df.index.day>=wetstartd)) | (df.index.month != 10))
@@ -37,37 +37,24 @@ def peak_finder(local_df):
 	thld=local_df.quantile(q=0.8)
 	peak_info=find_peaks(local_df, height=thld)
 	return peak_info
-peak_df=df.resample('AS-OCT').apply(peak_finder) #array of indicies  & magnitude
+peak_df=wetstart_df.resample('AS-OCT').apply(peak_finder) #array of indicies  & magnitude
 
 #Trying to extract data from peak_df
-last_peak_values=[]
-last_peak_indices=[]
-for i in range(len(peak_df.columns)-1):
-#	local_df=peak_df.iloc[:,i]
-	for j in range(len(peak_df)-1):
-		peak_ix=peak_df.iloc[j,i][0][-1]
-		peak_val=peak_df.iloc[j,i][-1]['peak_heights'][-1]
-		last_peak_indices.append(peak_ix)
-		last_peak_values.append(peak_val)
-df_shape=tuple(np.subtract(np.shape(peak_df),(1,1)))
-#When (1,0) get Error "cannot reshape array of size 14112 into shape (147,97)"
-#When (1,1) get Error "Shape of passed values is (147, 96), indices imply (147, 97)"
-last_peak_indices_df=pd.DataFrame(np.array(last_peak_indices).reshape(df_shape),columns=df.columns)
-last_peak_values_df=pd.DataFrame(np.array(last_peak_values).reshape(df_shape),columns=df.columns)
-#I want to add in the column names and indices (should be identical to peak_values), will then need to turn the integer from the df and the year from the index into something I can compare
 
-##Test on single peak_info element- works	
-#last_pk_values=[]
-#last_pk_indices=[]
-#i,j = 0,1
-#local_df=peak_df.iloc[j,i]
-#peak_val=local_df[-1]['peak_heights'][-1]
-##peak_ix=local_df.iloc[j][0][-1]
-#peak_ix=local_df[0][-1]
-#last_pk_values.append(peak_val)
-#last_pk_indices.append(peak_ix)
+last_peak_values=np.empty_like(peak_df.values)
+last_peak_indices=np.empty_like(peak_df.values)
 
-#Convert integer to datetime in python
+for ix,i in enumerate(peak_df.columns):
+	for jx,(j, row) in enumerate(peak_df.iterrows()):
+		peak_ix=row.loc[i][0][-1]
+		peak_val=row.loc[i][1]['peak_heights'][-1]
+		last_peak_indices[jx,ix]= peak_ix
+		last_peak_values[jx,ix] = peak_val
+
+last_peak_values_df=pd.DataFrame(last_peak_values,columns=df.columns,index=peak_df.index)
+last_peak_indices_df=pd.DataFrame(last_peak_indices,columns=df.columns,index=peak_df.index)
+
+#Convert integer to datetime in python (Marina said she could help)
 #def num_to_time(time_int):
 	
 #%%
@@ -80,13 +67,13 @@ search_df=df[search_ix]
 def start_date_finder(local_df):
 	start_thld=local_df.quantile(q=0.8)
 	possible_starts=local_df[local_df<start_thld]
-	return possible_starts
+	return possible_starts.index #these are values not indices, how do i get the index?
 starts=search_df.resample('AS-OCT').apply(start_date_finder) #currently has nan
 startlast=starts.resample('AS-OCT').last()
 #If no peak fulfills requirements, then there is no wet season initition event
 
 #Update wet_df to use real start and end dates
-wetstartm=10 # put in true values
+wetstartm=10
 wetstartd=20
 wetendm= 3
 wetendd=15
