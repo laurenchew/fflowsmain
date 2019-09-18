@@ -7,6 +7,7 @@ Created on Sun Jul 28 15:38:45 2019
 import pandas as pd
 import numpy as np
 from scipy.signal import find_peaks
+import matplotlib.pyplot as plt
 
 # load CSV data
 filenamein='FOL_in'
@@ -36,35 +37,44 @@ def peak_finder(local_df):
 	thld=local_df.quantile(q=0.8)
 	peak_info=find_peaks(local_df, height=thld)
 	return peak_info
-peak_df=df.resample('AS-OCT').apply(peak_finder) #array of indicies, dtype, & values
+peak_df=df.resample('AS-OCT').apply(peak_finder) #array of indicies  & magnitude
 
 #Trying to extract data from peak_df
 last_peak_values=[]
 last_peak_indices=[]
-for i in range(len(df.columns)):
+for i in range(len(peak_df.columns)-1):
 #	local_df=peak_df.iloc[:,i]
-	for j in range(len(df)):
+	for j in range(len(peak_df)-1):
 		peak_ix=peak_df.iloc[j,i][0][-1]
 		peak_val=peak_df.iloc[j,i][-1]['peak_heights'][-1]
 		last_peak_indices.append(peak_ix)
 		last_peak_values.append(peak_val)
-#last_peak_indices_df=pd.DataFrame(np.array(last_peak_values).reshape(np.shape(peak_df)),columns=df.columns)
-		
-#Test on single peak_info element- works	
+df_shape=tuple(np.subtract(np.shape(peak_df),(1,1)))
+#When (1,0) get Error "cannot reshape array of size 14112 into shape (147,97)"
+#When (1,1) get Error "Shape of passed values is (147, 96), indices imply (147, 97)"
+last_peak_indices_df=pd.DataFrame(np.array(last_peak_indices).reshape(df_shape),columns=df.columns)
+last_peak_values_df=pd.DataFrame(np.array(last_peak_values).reshape(df_shape),columns=df.columns)
+#I want to add in the column names and indices (should be identical to peak_values), will then need to turn the integer from the df and the year from the index into something I can compare
+
+##Test on single peak_info element- works	
 #last_pk_values=[]
 #last_pk_indices=[]
 #i,j = 0,1
 #local_df=peak_df.iloc[j,i]
 #peak_val=local_df[-1]['peak_heights'][-1]
-#peak_ix=local_df.iloc[j][0][-1]
+##peak_ix=local_df.iloc[j][0][-1]
+#peak_ix=local_df[0][-1]
 #last_pk_values.append(peak_val)
 #last_pk_indices.append(peak_ix)
 
+#Convert integer to datetime in python
+#def num_to_time(time_int):
+	
 #%%
 # Search from right to left starting at peak index from previous section. for first flow below 20% thld and below .diff threshold.
 #Get the actual start date of wet season
-wetstartendm=1 #replace with location of earliest peak from peak_info
-wetstartendd=15 #replace with location of earliest peak from peak_info
+wetstartendm=1 #replace with location of earliest peak from peak_df
+wetstartendd=15 #replace with location of earliest peak from peak_df
 search_ix = ( ((df.index.month == wetstartm)&(df.index.day>=wetstartd)) | (df.index.month > wetstartm)| ( df.index.month<wetstartendm) | ((df.index.month==wetstartendm)&(df.index.day<=wetstartendd)))
 search_df=df[search_ix]
 def start_date_finder(local_df):
